@@ -1,0 +1,47 @@
+.c-type-dialog {
+    width: 620px;
+}
+
+.c-type-dialog__params {
+    display: flex;
+}
+
+$preview-bg: #EEE;
+.c-type-dialog__preview {
+    background: $preview-bg;
+    border: 1.5px solid darken($preview-bg, 7);
+    border-left: none;
+    max-height: 320px;
+    overflow-y: scroll;
+
+    li { 
+        padding: 12px 16px;
+        padding-right: 0;
+        &:hover { background: darken($preview-bg, 5); }
+    }
+}
+
+.c-type-dialog__preview-item {
+    border-left: 4px solid darken($preview-bg, 7);
+    &:hover { border-left: 4px solid darken($preview-bg, 16); }
+
+    p { 
+        line-height: 0;
+        white-space: nowrap;
+        color: #4B4B4B;
+    }
+    div { margin: 0.4em 0; }
+    
+    &.base { 
+        border-left-color: darken($preview-bg, 50); 
+        background: darken($preview-bg, 2);
+        &::after {
+            content: 'yes';
+        }
+    }
+    
+    &.active { 
+        border-left-color: #2680EB; 
+        background: darken($preview-bg, 5);
+    }
+}
