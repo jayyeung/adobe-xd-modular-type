@@ -12,14 +12,15 @@ class NumberInput extends Component {
     }
 
     _validate(value) {
-        // Temporary way to validate values
-        // until Adobe XD implements proper number inputs
         return ((/^(?:[1-9]\d*|0)?(?:\.\d+)?$/g).test(value));
     }
 
     _handleChange = (e) => {
         const value = e.target.value;
         this.setState({value});
+
+        // Temporary way to validate values :P
+        // until Adobe XD implements proper number inputs
         if (this._validate(value))
             return this.props.input.onValidChange(value);
     }

@@ -16,8 +16,6 @@ class TypeDialog extends Component {
     _propagateTypeStep() {
         const { selection } = this.props;
 
-        // MobX's autorun triggers whenever
-        // selectedStep (observable) value changes
         autorun(() => {
             if (!this.selectedStep) return;
             
@@ -39,8 +37,8 @@ class TypeDialog extends Component {
 
     render() {
         const typeStore = this.props.store;
-        const { ratio, baseSize, range, modularScale } = typeStore;
-        const { setRatio, setRange, setBaseSize } = typeStore;
+        const { typeConfig, setConfig, modularScale } = typeStore;
+        const { ratio, range, baseSize } = typeConfig;
 
         return (
             <form className='c-type-dialog' onSubmit={()=>this.acceptDialog()}>
@@ -53,7 +51,7 @@ class TypeDialog extends Component {
                         <NumberInput title='Font Size (px)' input={{
                             autoFocus: true,
                             value: baseSize,
-                            onValidChange: setBaseSize,
+                            onValidChange: setConfig('baseSize'),
                             placeholder: 'Eg. 16'
                         }} />
                     </div>
@@ -61,13 +59,13 @@ class TypeDialog extends Component {
                     <div className='row'>
                         <NumberInput title='Scale Ratio' input={{
                             value: ratio,
-                            onValidChange: setRatio,
+                            onValidChange: setConfig('ratio'),
                             placeholder: 'Eg. 1.618'
                         }} />
 
                         <label style={{marginRight: 28}}>
                             <span></span>
-                            <select uxp-quiet='true' onChange={(e)=>setRatio(e.target.value || ratio)}> 
+                            <select uxp-quiet='true' onChange={(e)=>setConfig(e.target.value || ratio)}> 
                                 <option disabled>Custom Ratio</option>
                                 <option value='1.125'>Major Second – 8:9</option>
                                 <option value='1.2'>Minor Third – 5:6</option>
@@ -81,7 +79,7 @@ class TypeDialog extends Component {
 
                         <NumberInput title='Range' input={{
                             value: range,
-                            onValidChange: setRange,
+                            onValidChange: setConfig('range'),
                             style: {width: 40},
                             ['uxp-quiet']: true,
                             placeholder: 'Eg. 4'
