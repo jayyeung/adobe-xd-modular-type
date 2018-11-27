@@ -11,7 +11,7 @@ class NumberInput extends Component {
         this.setState({value: initValue});
     }
 
-    _validate(value) {
+    isNumber(value) {
         return ((/^(?:[1-9]\d*|0)?(?:\.\d+)?$/g).test(value));
     }
 
@@ -21,8 +21,8 @@ class NumberInput extends Component {
 
         // Temporary way to validate values :P
         // until Adobe XD implements proper number inputs
-        if (this._validate(value))
-            return this.props.input.onValidChange(value);
+        if (this.isNumber(value))
+            return this.props.onChange(value);
     }
 
     render() {
