@@ -26459,6 +26459,9 @@ let NumberInput = class NumberInput extends react__WEBPACK_IMPORTED_MODULE_0__["
         this._handleChange = e => {
             const value = e.target.value;
             this.setState({ value });
+
+            // Temporary way to validate values :P
+            // until Adobe XD implements proper number inputs
             if (this._validate(value)) return this.props.input.onValidChange(value);
         };
 
@@ -26471,8 +26474,6 @@ let NumberInput = class NumberInput extends react__WEBPACK_IMPORTED_MODULE_0__["
     }
 
     _validate(value) {
-        // Temporary way to validate values
-        // until Adobe XD implements proper number inputs
         return (/^(?:[1-9]\d*|0)?(?:\.\d+)?$/g.test(value)
         );
     }
@@ -26582,8 +26583,6 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
     _propagateTypeStep() {
         const { selection } = this.props;
 
-        // MobX's autorun triggers whenever
-        // selectedStep (observable) value changes
         Object(mobx__WEBPACK_IMPORTED_MODULE_0__["autorun"])(() => {
             if (!this.selectedStep) return;
 
@@ -26611,8 +26610,8 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
 
     render() {
         const typeStore = this.props.store;
-        const { ratio, baseSize, range, modularScale } = typeStore;
-        const { setRatio, setRange, setBaseSize } = typeStore;
+        const { typeConfig, setConfig, modularScale } = typeStore;
+        const { ratio, range, baseSize } = typeConfig;
 
         return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
             'form',
@@ -26637,7 +26636,7 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
                     react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_4__["default"], { title: 'Font Size (px)', input: {
                             autoFocus: true,
                             value: baseSize,
-                            onValidChange: setBaseSize,
+                            onValidChange: setConfig('baseSize'),
                             placeholder: 'Eg. 16'
                         } })
                 ),
@@ -26646,7 +26645,7 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
                     { className: 'row' },
                     react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_4__["default"], { title: 'Scale Ratio', input: {
                             value: ratio,
-                            onValidChange: setRatio,
+                            onValidChange: setConfig('ratio'),
                             placeholder: 'Eg. 1.618'
                         } }),
                     react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
@@ -26655,7 +26654,7 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
                         react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement('span', null),
                         react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
                             'select',
-                            { 'uxp-quiet': 'true', onChange: e => setRatio(e.target.value || ratio) },
+                            { 'uxp-quiet': 'true', onChange: e => setConfig(e.target.value || ratio) },
                             react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
                                 'option',
                                 { disabled: true },
@@ -26700,7 +26699,7 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
                     ),
                     react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_4__["default"], { title: 'Range', input: {
                             value: range,
-                            onValidChange: setRange,
+                            onValidChange: setConfig('range'),
                             style: { width: 40 },
                             ['uxp-quiet']: true,
                             placeholder: 'Eg. 4'
@@ -26854,7 +26853,7 @@ if (window.HTMLIFrameElement == null) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mobx */ "./node_modules/mobx/lib/mobx.module.js");
-var _dec, _dec2, _dec3, _desc, _value, _class, _descriptor, _descriptor2, _descriptor3;
+var _dec, _desc, _value, _class, _descriptor;
 
 function _initDefineProp(target, property, descriptor, context) {
     if (!descriptor) return;
@@ -26901,17 +26900,15 @@ function _initializerWarningHelper(descriptor, context) {
 
 
 
-let TypeStore = (_dec = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, _dec2 = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, _dec3 = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, (_class = class TypeStore {
+let TypeStore = (_dec = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, (_class = class TypeStore {
     constructor() {
-        _initDefineProp(this, 'ratio', _descriptor, this);
+        _initDefineProp(this, 'typeConfig', _descriptor, this);
 
-        _initDefineProp(this, 'range', _descriptor2, this);
-
-        _initDefineProp(this, 'baseSize', _descriptor3, this);
+        this.setConfig = key => value => this.setConfigKey(key, value);
     }
 
     get modularScale() {
-        const { range, ratio, baseSize } = this;
+        const { range, ratio, baseSize } = this.typeConfig;
         let step;let steps = [];
         for (let i = range; i >= -4; i--) {
             step = { step: i, fontSize: baseSize * ratio ** i };
@@ -26921,42 +26918,42 @@ let TypeStore = (_dec = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, _dec2
         return steps;
     }
 
-    setRatio(ratio) {
-        const limit = 3;
-        this.ratio = Math.max(Math.min(ratio, limit), 1);
-    }
-
-    setRange(range) {
-        const limit = 15;
-        this.range = Math.max(Math.min(range, limit), 1);
-    }
-
-    setBaseSize(size) {
-        this.baseSize = Math.max(1, size);
-    }
-
     // constructor() { this._fetchUserPref(); }
 
     /* async _fetchUserPref() {
         // TODO: add saving preferences
         // when needed in the future
     }*/
-}, (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'ratio', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
+    setConfigKey(key, value) {
+        if (!(key in this.typeConfig)) return console.log('no');
+
+        // TODO: implement better bounds checking
+        let min = 1,
+            max = value;
+        switch (key) {
+            case 'ratio':
+                max = 3;break;
+            case 'range':
+                max = 15;break;
+            case 'baseSize':
+                max = 100;break;
+        }
+
+        this.typeConfig[key] = Math.max(Math.min(value, max), min);
+    }
+
+    // Temporary curry function used
+    // for <NumberInput />'s 'onValidChange' function
+}, (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'typeConfig', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
     enumerable: true,
     initializer: function () {
-        return 1.25;
+        return {
+            ratio: 1.25,
+            range: 4,
+            baseSize: 16
+        };
     }
-}), _descriptor2 = _applyDecoratedDescriptor(_class.prototype, 'range', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
-    enumerable: true,
-    initializer: function () {
-        return 4;
-    }
-}), _descriptor3 = _applyDecoratedDescriptor(_class.prototype, 'baseSize', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
-    enumerable: true,
-    initializer: function () {
-        return 16;
-    }
-}), _applyDecoratedDescriptor(_class.prototype, 'modularScale', [mobx__WEBPACK_IMPORTED_MODULE_0__["computed"]], Object.getOwnPropertyDescriptor(_class.prototype, 'modularScale'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setRatio', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'setRatio'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setRange', [_dec2], Object.getOwnPropertyDescriptor(_class.prototype, 'setRange'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setBaseSize', [_dec3], Object.getOwnPropertyDescriptor(_class.prototype, 'setBaseSize'), _class.prototype)), _class));
+}), _applyDecoratedDescriptor(_class.prototype, 'modularScale', [mobx__WEBPACK_IMPORTED_MODULE_0__["computed"]], Object.getOwnPropertyDescriptor(_class.prototype, 'modularScale'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setConfigKey', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'setConfigKey'), _class.prototype)), _class));
 
 
 const typeStore = new TypeStore();

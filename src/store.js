@@ -1,12 +1,14 @@
 import { observable, computed, action } from 'mobx';
 
 class TypeStore {
-    @observable ratio = 1.25;
-    @observable range = 4;
-    @observable baseSize = 16;
+    @observable typeConfig = {
+        ratio: 1.25,
+        range: 4,
+        baseSize: 16
+    };
 
     @computed get modularScale() {
-        const { range, ratio, baseSize } = this;
+        const { range, ratio, baseSize } = this.typeConfig;
         let step; let steps = [];
         for (let i = range; i >= -4; i--) {
             step = { step: i, fontSize: baseSize*(ratio**i) };
@@ -16,19 +18,23 @@ class TypeStore {
         return steps;
     }
 
-    @action.bound setRatio(ratio) {
-        const limit = 3;
-        this.ratio = Math.max(Math.min(ratio, limit), 1);
+    @action.bound setConfigKey(key, value) {
+        if (!(key in this.typeConfig)) return console.log('no');
+        
+        // TODO: implement better bounds checking
+        let min = 1, max = value;
+        switch(key) {
+            case 'ratio': max = 3; break;
+            case 'range': max = 15;  break;
+            case 'baseSize': max = 100; break;
+        }
+
+        this.typeConfig[key] = Math.max(Math.min(value, max), min);
     }
 
-    @action.bound setRange(range) {
-        const limit = 15;
-        this.range = Math.max(Math.min(range, limit), 1);
-    }
-
-    @action.bound setBaseSize(size) {
-        this.baseSize = Math.max(1, size);
-    }
+    // Temporary curry function used
+    // for <NumberInput />'s 'onValidChange' function
+    setConfig = (key) => ((value) => this.setConfigKey(key, value));
 
     // constructor() { this._fetchUserPref(); }
 
