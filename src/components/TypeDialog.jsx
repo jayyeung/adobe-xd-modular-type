@@ -1,10 +1,11 @@
-import { autorun, observable } from 'mobx';
-import { observer } from 'mobx-react';
+import { autorun, observable, computed } from 'mobx';
+import { observer, inject } from 'mobx-react';
 import React, { Component } from 'react';
 
 import { Text } from 'scenegraph';
 import NumberInput from './NumberInput.jsx';
 
+@inject('typeStore')
 @observer
 class TypeDialog extends Component {
     @observable selectedStep = null;
@@ -36,8 +37,7 @@ class TypeDialog extends Component {
     closeDialog(reason) { return this.props.dialog.close(reason || 'USER_CANCEL'); }   
 
     render() {
-        const typeStore = this.props.store;
-        const { typeConfig, setConfig, modularScale } = typeStore;
+        const { typeConfig, setConfig, modularScale } = this.props.typeStore;
         const { ratio, range, baseSize } = typeConfig;
 
         return (
@@ -65,7 +65,7 @@ class TypeDialog extends Component {
 
                         <label style={{marginRight: 28}}>
                             <span></span>
-                            <select uxp-quiet='true' onChange={(e)=>setConfig(e.target.value || ratio)}> 
+                            <select uxp-quiet='true' onChange={(e)=>setConfig('ratio')(e.target.value || ratio)}> 
                                 <option disabled>Custom Ratio</option>
                                 <option value='1.125'>Major Second – 8:9</option>
                                 <option value='1.2'>Minor Third – 5:6</option>
@@ -81,7 +81,6 @@ class TypeDialog extends Component {
                             value: range,
                             onValidChange: setConfig('range'),
                             style: {width: 40},
-                            ['uxp-quiet']: true,
                             placeholder: 'Eg. 4'
                         }} />
                     </div>
@@ -97,7 +96,7 @@ class TypeDialog extends Component {
                                 onClick={()=>this._selectStep(step_i)} key={`step-${step}`}>
                                 <p style={{fontSize: fontSize}}>The quick brown fox jumps over the lazy dog</p>
                                 <div className='row' style={{opacity: 0.7, marginLeft: 12}}>
-                                    <span className='u-style-italic'>{`${(isBase) ? 'Base' : `Step ${step}`} –`}</span>
+                                    <span>{`${(isBase) ? 'Base' : `Step ${step}`} –`}</span>
                                     <span>{` ${fontSize.toFixed(3)}px / ${fontSizeEm.toFixed(3)}em`}</span>
                                 </div>
                             </li>

@@ -26517,7 +26517,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var scenegraph__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! scenegraph */ "scenegraph");
 /* harmony import */ var scenegraph__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(scenegraph__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _NumberInput_jsx__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./NumberInput.jsx */ "./src/components/NumberInput.jsx");
-var _class, _desc, _value, _class2, _descriptor;
+var _dec, _class, _desc, _value, _class2, _descriptor;
 
 function _initDefineProp(target, property, descriptor, context) {
     if (!descriptor) return;
@@ -26569,7 +26569,7 @@ function _initializerWarningHelper(descriptor, context) {
 
 
 
-let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_class = (_class2 = class TypeDialog extends react__WEBPACK_IMPORTED_MODULE_2__["Component"] {
+let TypeDialog = (_dec = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["inject"])('typeStore'), _dec(_class = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_class = (_class2 = class TypeDialog extends react__WEBPACK_IMPORTED_MODULE_2__["Component"] {
     constructor(...args) {
         var _temp;
 
@@ -26609,8 +26609,7 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
     }
 
     render() {
-        const typeStore = this.props.store;
-        const { typeConfig, setConfig, modularScale } = typeStore;
+        const { typeConfig, setConfig, modularScale } = this.props.typeStore;
         const { ratio, range, baseSize } = typeConfig;
 
         return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
@@ -26654,7 +26653,7 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
                         react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement('span', null),
                         react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
                             'select',
-                            { 'uxp-quiet': 'true', onChange: e => setConfig(e.target.value || ratio) },
+                            { 'uxp-quiet': 'true', onChange: e => setConfig('ratio')(e.target.value || ratio) },
                             react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
                                 'option',
                                 { disabled: true },
@@ -26701,7 +26700,6 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
                             value: range,
                             onValidChange: setConfig('range'),
                             style: { width: 40 },
-                            ['uxp-quiet']: true,
                             placeholder: 'Eg. 4'
                         } })
                 )
@@ -26727,7 +26725,7 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
                             { className: 'row', style: { opacity: 0.7, marginLeft: 12 } },
                             react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
                                 'span',
-                                { className: 'u-style-italic' },
+                                null,
                                 `${isBase ? 'Base' : `Step ${step}`} –`
                             ),
                             react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
@@ -26761,7 +26759,8 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
     initializer: function () {
         return null;
     }
-})), _class2)) || _class;
+})), _class2)) || _class) || _class);
+
 
 /* harmony default export */ __webpack_exports__["default"] = (TypeDialog);
 
@@ -26774,24 +26773,26 @@ let TypeDialog = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_cl
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { observable } = __webpack_require__(/*! mobx */ "./node_modules/mobx/lib/mobx.module.js");
 const reactShim = __webpack_require__(/*! ./react-shim */ "./src/react-shim.js");
+const { Provider } = __webpack_require__(/*! mobx-react */ "./node_modules/mobx-react/index.module.js");
 const React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 const ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
 
 const styles = __webpack_require__(/*! ./styles/main.scss */ "./src/styles/main.scss");
-const TypeStore = __webpack_require__(/*! ./store */ "./src/store.js").default;
+const stores = __webpack_require__(/*! ./stores/store */ "./src/stores/store.js").default;
 const TypeDialog = __webpack_require__(/*! ./components/TypeDialog.jsx */ "./src/components/TypeDialog.jsx").default;
 
 let dialog;
-
 function getDialog(selection) {
     if (dialog == null) {
         dialog = document.createElement('dialog');
-        ReactDOM.render(React.createElement(TypeDialog, {
-            selection: selection,
-            store: TypeStore,
-            dialog: dialog }), dialog);
+        ReactDOM.render(React.createElement(
+            Provider,
+            stores,
+            React.createElement(TypeDialog, {
+                selection: selection,
+                dialog: dialog })
+        ), dialog);
     }
     return dialog;
 }
@@ -26843,10 +26844,10 @@ if (window.HTMLIFrameElement == null) {
 
 /***/ }),
 
-/***/ "./src/store.js":
-/*!**********************!*\
-  !*** ./src/store.js ***!
-  \**********************/
+/***/ "./src/stores/TypeStore.js":
+/*!*********************************!*\
+  !*** ./src/stores/TypeStore.js ***!
+  \*********************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -26958,6 +26959,21 @@ let TypeStore = (_dec = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, (_cla
 
 const typeStore = new TypeStore();
 /* harmony default export */ __webpack_exports__["default"] = (typeStore);
+
+/***/ }),
+
+/***/ "./src/stores/store.js":
+/*!*****************************!*\
+  !*** ./src/stores/store.js ***!
+  \*****************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _TypeStore__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./TypeStore */ "./src/stores/TypeStore.js");
+
+/* harmony default export */ __webpack_exports__["default"] = ({ typeStore: _TypeStore__WEBPACK_IMPORTED_MODULE_0__["default"] });
 
 /***/ }),
 
