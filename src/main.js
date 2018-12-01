@@ -6,7 +6,7 @@ const ReactDOM = require('react-dom');
 
 const styles = require('./styles/main.scss');
 const stores = require('./stores/store').default;
-const ModularType = require('./components/ModularType').default;
+const ModularType = require('./components/ModularType').default; 
 
 let dialog; let dialogOpen = observable.box(false);
 function getDialog(selection) {

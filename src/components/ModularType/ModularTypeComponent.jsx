@@ -4,7 +4,7 @@ import React from 'react';
 import NumberInput from '../NumberInput';
 import presets from '../../assets/presets';
 
-const TDComponent = observer((props) => {
+const ModularTypeComponent = observer((props) => {
     const { currentStep, selectStep, acceptDialog, closeDialog } = props;
     const { typeConfig, setConfig, modularScale } = props.typeStore;
     const { ratio, range, baseSize } = typeConfig;
@@ -91,4 +91,4 @@ const TDComponent = observer((props) => {
     );
 });
 
-export default TDComponent;
+export default ModularTypeComponent;

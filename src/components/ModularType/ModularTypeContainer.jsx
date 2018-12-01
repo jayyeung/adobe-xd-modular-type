@@ -1,16 +1,19 @@
-import { autorun, observable } from 'mobx';
+import { autorun, observable, when } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import React, { Component } from 'react';
 
 import { Text } from 'scenegraph';
-import TDComponent from './TDComponent.jsx';
+import ModularTypeComponent from './ModularTypeComponent.jsx';
 
 @inject('typeStore')
 @observer
-class TDContainer extends Component {
+class ModularTypeContainer extends Component {
     @observable currentStep = null;
 
-    componentDidMount() { autorun(this._propagateTypeStep); }
+    componentDidMount() { 
+        autorun(this._propagateTypeStep); 
+        autorun(this.onOpenDialog);
+    }
 
     _selectStep = (step) => { this.currentStep = step; }
     _propagateTypeStep = () => {
@@ -30,11 +33,16 @@ class TDContainer extends Component {
         )
     }
 
+    onOpenDialog = () => {
+        if (!this.props.open.get()) return;
+        console.log("I'm open mate!")
+    }
+
     acceptDialog = () => this.closeDialog('USER_ACCEPT');
     closeDialog = (reason) => this.props.dialog.close(reason || 'USER_CANCEL') 
 
     render() {
-        return <TDComponent 
+        return <ModularTypeComponent 
                 typeStore={this.props.typeStore}
                 currentStep={this.currentStep}
                 selectStep={this._selectStep}
@@ -44,5 +52,5 @@ class TDContainer extends Component {
     }
 }
 
-export default TDContainer;
+export default ModularTypeContainer;
 
