@@ -1,4 +1,4 @@
-import { autorun, observable, computed } from 'mobx';
+import { autorun, observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import React, { Component } from 'react';
 
@@ -18,15 +18,16 @@ class TypeDialog extends Component {
         const { selection } = this.props;
 
         autorun(() => {
-            if (!this.selectedStep) return;
+            const scale = this.selectedStep;
+            if (!scale) return;
             
             (selection.items).filter(item => {
                 return item instanceof Text;
             }).map(item => {
                 const { fontSize } = item.styleRanges[0];
-                item.lineSpacing = (this.selectedStep.fontSize) * (item.lineSpacing / fontSize);
+                item.lineSpacing = (scale.fontSize) * (item.lineSpacing / fontSize);
                 item.styleRanges = [{
-                    fontSize: (this.selectedStep.fontSize)
+                    fontSize: (scale.fontSize)
                 }];
             })
         });
@@ -48,20 +49,24 @@ class TypeDialog extends Component {
 
                 <fieldset className='c-type-dialog__params' style={{margin: '8px 0 20px'}}>
                     <div className='row'>
-                        <NumberInput title='Font Size (px)' input={{
-                            autoFocus: true,
-                            value: baseSize,
-                            onValidChange: setConfig('baseSize'),
-                            placeholder: 'Eg. 16'
-                        }} />
+                        <NumberInput title='Font Size (px)' 
+                            onChange={setConfig('baseSize')}
+                            input={{
+                                autoFocus: true,
+                                value: baseSize,
+                                placeholder: 'Eg. 16'
+                            }}
+                        />
                     </div>
 
                     <div className='row'>
-                        <NumberInput title='Scale Ratio' input={{
-                            value: ratio,
-                            onValidChange: setConfig('ratio'),
-                            placeholder: 'Eg. 1.618'
-                        }} />
+                        <NumberInput title='Scale Ratio' 
+                            onChange={setConfig('ratio')}
+                            input={{
+                                value: ratio,
+                                placeholder: 'Eg. 1.618'
+                            }} 
+                        />
 
                         <label style={{marginRight: 28}}>
                             <span></span>
@@ -77,12 +82,14 @@ class TypeDialog extends Component {
                             </select>
                         </label>
 
-                        <NumberInput title='Range' input={{
-                            value: range,
-                            onValidChange: setConfig('range'),
-                            style: {width: 40},
-                            placeholder: 'Eg. 4'
-                        }} />
+                        <NumberInput title='Range'
+                            onChange={setConfig('range')}
+                            input={{
+                                value: range,
+                                style: {width: 40},
+                                placeholder: 'Eg. 4'
+                            }}
+                        />
                     </div>
                 </fieldset>
 
@@ -91,10 +98,16 @@ class TypeDialog extends Component {
                         const { step, fontSize, fontSizeEm } = step_i;
                         const isBase = (step === 0) ? 'base' : '';
                         const isActive = (this.selectedStep && this.selectedStep.step === step) ? 'active' : '';
+                        const pStyles = {
+                            fontSize
+                        };
+
                         return ( 
                             <li className={`c-type-dialog__preview-item ${isBase} ${isActive}`}
-                                onClick={()=>this._selectStep(step_i)} key={`step-${step}`}>
-                                <p style={{fontSize: fontSize}}>The quick brown fox jumps over the lazy dog</p>
+                                onClick={()=>this._selectStep(step_i)}
+                                key={`step-${step}`}>
+
+                                <p style={pStyles}>The quick brown fox jumps over the lazy dog</p>
                                 <div className='row' style={{opacity: 0.7, marginLeft: 12}}>
                                     <span>{`${(isBase) ? 'Base' : `Step ${step}`} –`}</span>
                                     <span>{` ${fontSize.toFixed(3)}px / ${fontSizeEm.toFixed(3)}em`}</span>
