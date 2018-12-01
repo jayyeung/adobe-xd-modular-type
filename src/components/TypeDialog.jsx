@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 
 import { Text } from 'scenegraph';
 import NumberInput from './NumberInput.jsx';
+import predefScale from '../assets/presets';
 
 @inject('typeStore')
 @observer
@@ -21,15 +22,16 @@ class TypeDialog extends Component {
             const scale = this.selectedStep;
             if (!scale) return;
             
-            (selection.items).filter(item => {
-                return item instanceof Text;
-            }).map(item => {
-                const { fontSize } = item.styleRanges[0];
-                item.lineSpacing = (scale.fontSize) * (item.lineSpacing / fontSize);
-                item.styleRanges = [{
-                    fontSize: (scale.fontSize)
-                }];
-            })
+            (selection.items)
+                .filter(item => { return item instanceof Text; })
+                .map(item => {
+                    const { fontSize } = item.styleRanges[0];
+                    item.lineSpacing = (scale.fontSize) * (item.lineSpacing / fontSize);
+                    item.styleRanges = [{
+                        fontSize: (scale.fontSize)
+                    }];
+                }
+            )
         });
     }
 
@@ -47,7 +49,7 @@ class TypeDialog extends Component {
                 <p>Automatically scale your selected text layers based on a chosen font size/step.</p>
                 <hr/>
 
-                <fieldset className='c-type-dialog__params' style={{margin: '8px 0 20px'}}>
+                <fieldset className='c-type-dialog__params'>
                     <div className='row'>
                         <NumberInput title='Font Size (px)' 
                             onChange={setConfig('baseSize')}
@@ -71,14 +73,10 @@ class TypeDialog extends Component {
                         <label style={{marginRight: 28}}>
                             <span></span>
                             <select uxp-quiet='true' onChange={(e)=>setConfig('ratio')(e.target.value || ratio)}> 
-                                <option disabled>Custom Ratio</option>
-                                <option value='1.125'>Major Second – 8:9</option>
-                                <option value='1.2'>Minor Third – 5:6</option>
-                                <option value='1.25'>Major Third – 4:5</option>
-                                <option value='1.333'>Fourth – 3:4</option>
-                                <option value='1.414'>Augmented Fourth – 1:&radic;4</option>
-                                <option value='1.5'>Fifth – 2:3</option>
-                                <option value='1.667'>Minor Sixth – 5:8</option>
+                                <option value>Custom Ratio</option>
+                                { predefScale.map(step => (
+                                    <option value={step.value}>{`${step.label} – ${step.value}`}</option>
+                                )) }
                             </select>
                         </label>
 
@@ -98,9 +96,7 @@ class TypeDialog extends Component {
                         const { step, fontSize, fontSizeEm } = step_i;
                         const isBase = (step === 0) ? 'base' : '';
                         const isActive = (this.selectedStep && this.selectedStep.step === step) ? 'active' : '';
-                        const pStyles = {
-                            fontSize
-                        };
+                        const pStyles = { fontSize };
 
                         return ( 
                             <li className={`c-type-dialog__preview-item ${isBase} ${isActive}`}
