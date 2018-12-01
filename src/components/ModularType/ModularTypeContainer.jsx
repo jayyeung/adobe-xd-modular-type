@@ -1,28 +1,31 @@
-import { autorun, observable, when } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { autorun, observable } from 'mobx';
+import { observer } from 'mobx-react';
 import React, { Component } from 'react';
 
 import { Text } from 'scenegraph';
 import ModularTypeComponent from './ModularTypeComponent.jsx';
 
-@inject('typeStore')
 @observer
 class ModularTypeContainer extends Component {
-    @observable currentStep = null;
-
     componentDidMount() { 
         autorun(this._propagateTypeStep); 
-        autorun(this.onOpenDialog);
+        autorun(this.onDialogActive);
+    }
+
+    @observable currentStep = null;
+    @observable currentSelection = null;
+
+    get selectedTextItems() {
+        const selection = this.props.selection.items;
+        return selection.filter((item) => (item instanceof Text));
     }
 
     _selectStep = (step) => { this.currentStep = step; }
     _propagateTypeStep = () => {
-        const selection = this.props.selection;
         const scale = this.currentStep;
         if (!scale) return;
         
-        (selection.items)
-            .filter((item) => (item instanceof Text))
+        this.selectedTextItems
             .map(item => {
                 const { fontSize } = item.styleRanges[0];
                 item.lineSpacing = (scale.fontSize) * (item.lineSpacing / fontSize);
@@ -33,13 +36,14 @@ class ModularTypeContainer extends Component {
         )
     }
 
-    onOpenDialog = () => {
-        if (!this.props.open.get()) return;
-        console.log("I'm open mate!")
+    onDialogActive = () => {
+        if (!this.props.active) return;
+
     }
 
     acceptDialog = () => this.closeDialog('USER_ACCEPT');
     closeDialog = (reason) => this.props.dialog.close(reason || 'USER_CANCEL') 
+
 
     render() {
         return <ModularTypeComponent 
