@@ -11,10 +11,7 @@ class NumberInput extends Component {
         this.setState({value: initValue});
     }
 
-    isNumber(value) {
-        return ((/^(?:[1-9]\d*|0)?(?:\.\d+)?$/g).test(value));
-    }
-
+    isNumber = (value) => ((/^(?:[1-9]\d*|0)?(?:\.\d+)?$/g).test(value));
     _handleChange = (e) => {
         const value = e.target.value;
         this.setState({value});

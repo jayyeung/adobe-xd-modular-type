@@ -4,47 +4,43 @@ import React, { Component } from 'react';
 
 import { Text } from 'scenegraph';
 import NumberInput from './NumberInput.jsx';
-import predefScale from '../assets/presets';
+import presets from '../assets/presets';
 
 @inject('typeStore')
 @observer
 class TypeDialog extends Component {
     @observable selectedStep = null;
 
-    componentDidMount() {
-        this._propagateTypeStep();
+    componentDidMount() { autorun(this._propagateTypeStep); }
+
+    _selectStep = (step) => { this.selectedStep = step; }
+    _propagateTypeStep = () => {
+        const selection = this.props.selection;
+        const scale = this.selectedStep;
+        if (!scale) return;
+        
+        (selection.items)
+            .filter((item) => (item instanceof Text))
+            .map(item => {
+                const { fontSize } = item.styleRanges[0];
+                item.lineSpacing = (scale.fontSize) * (item.lineSpacing / fontSize);
+                item.styleRanges = [{
+                    fontSize: (scale.fontSize)
+                }];
+            }
+        )
     }
 
-    _propagateTypeStep() {
-        const { selection } = this.props;
-
-        autorun(() => {
-            const scale = this.selectedStep;
-            if (!scale) return;
-            
-            (selection.items)
-                .filter(item => { return item instanceof Text; })
-                .map(item => {
-                    const { fontSize } = item.styleRanges[0];
-                    item.lineSpacing = (scale.fontSize) * (item.lineSpacing / fontSize);
-                    item.styleRanges = [{
-                        fontSize: (scale.fontSize)
-                    }];
-                }
-            )
-        });
-    }
-
-    _selectStep(step) { this.selectedStep = step; }
-    acceptDialog() { return this.closeDialog('USER_ACCEPT'); }
-    closeDialog(reason) { return this.props.dialog.close(reason || 'USER_CANCEL'); }   
+    acceptDialog = () => this.closeDialog('USER_ACCEPT');
+    closeDialog = (reason) => this.props.dialog.close(reason || 'USER_CANCEL') 
 
     render() {
+        const { acceptDialog, closeDialog, selectedStep, _selectStep } = this;
         const { typeConfig, setConfig, modularScale } = this.props.typeStore;
         const { ratio, range, baseSize } = typeConfig;
 
         return (
-            <form className='c-type-dialog' onSubmit={()=>this.acceptDialog()}>
+            <form className='c-type-dialog' onSubmit={acceptDialog}>
                 <h1>Modulize Type</h1>
                 <p>Automatically scale your selected text layers based on a chosen font size/step.</p>
                 <hr/>
@@ -74,8 +70,11 @@ class TypeDialog extends Component {
                             <span></span>
                             <select uxp-quiet='true' onChange={(e)=>setConfig('ratio')(e.target.value || ratio)}> 
                                 <option value>Custom Ratio</option>
-                                { predefScale.map(step => (
-                                    <option value={step.value}>{`${step.label} – ${step.value}`}</option>
+
+                                { presets.map((step, i) => (
+                                    <option key={`preset-${i}`} value={step.value}>
+                                        {`${step.label} – ${step.value}`}
+                                    </option>
                                 )) }
                             </select>
                         </label>
@@ -92,15 +91,15 @@ class TypeDialog extends Component {
                 </fieldset>
 
                 <ul className='c-type-dialog__preview'>
-                    { modularScale.map(step_i => {
+                    { modularScale.map((step_i) => {
                         const { step, fontSize, fontSizeEm } = step_i;
                         const isBase = (step === 0) ? 'base' : '';
-                        const isActive = (this.selectedStep && this.selectedStep.step === step) ? 'active' : '';
+                        const isActive = (selectedStep && selectedStep.step === step) ? 'active' : '';
                         const pStyles = { fontSize };
 
                         return ( 
                             <li className={`c-type-dialog__preview-item ${isBase} ${isActive}`}
-                                onClick={()=>this._selectStep(step_i)}
+                                onClick={()=>_selectStep(step_i)}
                                 key={`step-${step}`}>
 
                                 <p style={pStyles}>The quick brown fox jumps over the lazy dog</p>
@@ -115,7 +114,7 @@ class TypeDialog extends Component {
 
                 <footer>
                     <button uxp-variant='secondary' uxp-quiet='true'
-                        onClick={()=>this.closeDialog()}>Cancel</button>
+                        onClick={()=>closeDialog()}>Cancel</button>
                     <button type='submit' uxp-variant='cta'>Apply Scale</button>
                 </footer>
             </form>

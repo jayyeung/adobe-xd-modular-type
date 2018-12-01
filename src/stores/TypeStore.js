@@ -9,8 +9,8 @@ class TypeStore {
 
     @computed get modularScale() {
         const { range, ratio, baseSize } = this.typeConfig;
-        let step; let steps = [];
-        for (let i = range; i >= -4; i--) {
+        let step, i; let steps = [];
+        for (i = range; i >= -4; i--) {
             step = { step: i, fontSize: baseSize*(ratio**i) };
             step.fontSizeEm = step.fontSize / baseSize;
             steps.push(step);
@@ -18,8 +18,8 @@ class TypeStore {
         return steps;
     }
 
-    @action.bound setConfigKey(key, value) {
-        if (!(key in this.typeConfig)) return console.log('no');
+    @action setConfigKey = (key, value) => {
+        if (!(key in this.typeConfig)) return;
         
         // TODO: implement better bounds checking
         let min = 1, max = value;
