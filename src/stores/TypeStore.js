@@ -18,7 +18,7 @@ class TypeStore {
         return steps;
     }
 
-    @action setConfigKey = (key, value) => {
+    @action setConfig = (key, value) => {
         if (!(key in this.typeConfig)) return;
         
         // TODO: implement better bounds checking
@@ -31,17 +31,6 @@ class TypeStore {
 
         this.typeConfig[key] = Math.max(Math.min(value, max), min);
     }
-
-    // Temporary curry function used
-    // for <NumberInput />'s 'onValidChange' function
-    setConfig = (key) => ((value) => this.setConfigKey(key, value));
-
-    // constructor() { this._fetchUserPref(); }
-
-    /* async _fetchUserPref() {
-        // TODO: add saving preferences
-        // when needed in the future
-    }*/
 }
 
 const typeStore = new TypeStore();

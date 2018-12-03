@@ -5,7 +5,8 @@ import NumberInput from '../NumberInput';
 import presets from '../../assets/presets';
 
 const ModularTypeComponent = observer((props) => {
-    const { currentStep, selectStep, acceptDialog, closeDialog } = props;
+    const { currentStep, selectStep } = props;
+    const { acceptDialog, closeDialog } = props;
     const { typeConfig, setConfig, modularScale } = props.typeStore;
     const { ratio, range, baseSize } = typeConfig;
 
@@ -18,10 +19,11 @@ const ModularTypeComponent = observer((props) => {
             <fieldset className='c-type-dialog__params'>
                 <div className='row'>
                     <NumberInput title='Font Size (px)' 
-                        onChange={setConfig('baseSize')}
+                        onChange={(v)=>setConfig('baseSize', v)}
                         input={{
                             autoFocus: true,
                             value: baseSize,
+                            style: {width: 72},
                             placeholder: 'Eg. 16'
                         }}
                     />
@@ -29,7 +31,7 @@ const ModularTypeComponent = observer((props) => {
 
                 <div className='row'>
                     <NumberInput title='Scale Ratio' 
-                        onChange={setConfig('ratio')}
+                        onChange={(v)=>setConfig('ratio', v)}
                         input={{
                             value: ratio,
                             placeholder: 'Eg. 1.618'
@@ -38,8 +40,8 @@ const ModularTypeComponent = observer((props) => {
 
                     <label style={{marginRight: 28}}>
                         <span></span>
-                        <select uxp-quiet='true' onChange={(e)=>setConfig('ratio')(e.target.value || ratio)}> 
-                            <option value>Custom Ratio</option>
+                        <select uxp-quiet='true' onChange={(e)=>setConfig('ratio', e.target.value || ratio)}> 
+                            <option defaultValue>Custom Ratio</option>
 
                             { presets.map((step, i) => (
                                 <option key={`preset-${i}`} value={step.value}>
@@ -50,7 +52,7 @@ const ModularTypeComponent = observer((props) => {
                     </label>
 
                     <NumberInput title='Range'
-                        onChange={setConfig('range')}
+                        onChange={(v)=>setConfig('range', v)}
                         input={{
                             value: range,
                             style: {width: 40},
@@ -75,7 +77,7 @@ const ModularTypeComponent = observer((props) => {
                             <p style={pStyles}>The quick brown fox jumps over the lazy dog</p>
                             <div className='row' style={{opacity: 0.7, marginLeft: 12}}>
                                 <span>{`${(isBase) ? 'Base' : `Step ${step}`} –`}</span>
-                                <span>{` ${fontSize.toFixed(3)}px / ${fontSizeEm.toFixed(3)}em`}</span>
+                                <span>{` ${parseFloat(fontSize.toFixed(3))}px / ${parseFloat(fontSizeEm.toFixed(3))}em`}</span>
                             </div>
                         </li>
                     );
