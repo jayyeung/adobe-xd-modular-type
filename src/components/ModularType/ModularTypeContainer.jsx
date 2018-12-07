@@ -1,26 +1,26 @@
 import { autorun, observable } from 'mobx';
 import { observer } from 'mobx-react';
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 
 import { Text } from 'scenegraph';
 import ModularTypeComponent from './ModularTypeComponent.jsx';
 
 @observer
 class ModularTypeContainer extends Component {
+    @observable currentStep = null;
+
     componentDidMount() { 
-        autorun(this._propagateTypeStep); 
         autorun(this.onDialogActive);
+        autorun(this._propagateTypeStep); 
     }
 
-    @observable currentStep = null;
-    @observable currentSelection = null;
-
     get selectedTextItems() {
-        const selection = this.props.selection.items;
+        const selection = this.props.dialog.selection.items;
         return selection.filter((item) => (item instanceof Text));
     }
 
     _selectStep = (step) => { this.currentStep = step; }
+    
     _propagateTypeStep = () => {
         const scale = this.currentStep;
         if (!scale) return;
@@ -37,21 +37,18 @@ class ModularTypeContainer extends Component {
     }
 
     onDialogActive = () => {
-        if (!this.props.active) return;
-
+        if (!this.props.dialog.active) return;
+        if (this.selectedTextItems.length <= 0)
+            console.log('error')
     }
-
-    acceptDialog = () => this.closeDialog('USER_ACCEPT');
-    closeDialog = (reason) => this.props.dialog.close(reason || 'USER_CANCEL') 
-
 
     render() {
         return <ModularTypeComponent 
-                typeStore={this.props.typeStore}
-                currentStep={this.currentStep}
-                selectStep={this._selectStep}
-                acceptDialog={this.acceptDialog}
-                closeDialog={this.closeDialog}
+            typeStore={this.props.typeStore}
+            currentStep={this.currentStep}
+            selectStep={this._selectStep}
+            acceptDialog={this.props.dialog.acceptDialog}
+            closeDialog={this.props.dialog.closeDialog}
         />;
     }
 }

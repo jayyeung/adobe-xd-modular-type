@@ -24,8 +24,8 @@ class Dialog {
     }
 
     @action _setActive = (active) => { this.active = active; }
-    close = () => { this.target.close('USER_CLOSE'); }
-    accept = () => { this.target.close('USER_ACCEPT'); }
+    closeDialog = () => { this.target.close('USER_CLOSE'); }
+    acceptDialog = () => { this.target.close('USER_ACCEPT'); }
 }
 
 const dialog = new Dialog();
