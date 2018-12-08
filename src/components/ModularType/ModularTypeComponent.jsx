@@ -1,13 +1,14 @@
-import { observer } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
 import React from 'react';
 
-import NumberInput from '../NumberInput';
+import NumberInput from '../NumberInput.jsx';
 import presets from '../../assets/presets';
 
-const ModularTypeComponent = observer((props) => {
-    const { currentStep, selectStep } = props;
-    const { acceptDialog, closeDialog } = props;
-    const { typeConfig, setConfig, modularScale } = props.typeStore;
+const ModularTypeComponent = inject('dialog', 'typeStore')(observer((props) => {
+    const { currentStep, selectStep, inpRef } = props;
+
+    const { acceptDialog, closeDialog } = props.dialog;
+    const { typeConfig, editConfig, modularScale } = props.typeStore;
     const { ratio, range, baseSize } = typeConfig;
 
     return (
@@ -19,7 +20,7 @@ const ModularTypeComponent = observer((props) => {
             <fieldset className='c-type-dialog__params'>
                 <div className='row'>
                     <NumberInput title='Font Size (px)' 
-                        onChange={(v)=>setConfig('baseSize', v)}
+                        onChange={(v)=>editConfig('baseSize', v)}
                         input={{
                             autoFocus: true,
                             value: baseSize,
@@ -30,18 +31,22 @@ const ModularTypeComponent = observer((props) => {
                 </div>
 
                 <div className='row'>
-                    <NumberInput title='Scale Ratio' 
-                        onChange={(v)=>setConfig('ratio', v)}
+                    <NumberInput title='Scale Ratio'
+                        ref={inpRef.ratio}
+                        onChange={(v)=>{editConfig('ratio', v); inpRef.ratioDD.current.selectedIndex = 0}}
                         input={{
                             value: ratio,
                             placeholder: 'Eg. 1.618'
                         }} 
                     />
 
-                    <label style={{marginRight: 28}}>
+                    <label style={{marginRight: 20}}>
                         <span></span>
-                        <select uxp-quiet='true' onChange={(e)=>setConfig('ratio', e.target.value || ratio)}> 
-                            <option defaultValue>Custom Ratio</option>
+                        <select uxp-quiet='true'
+                            ref={inpRef.ratioDD}
+                            onChange={(e)=>{inpRef.ratio.current.setValue(e.target.value); editConfig('ratio', e.target.value)}}>
+
+                            <option value={ratio}>Custom Ratio</option>
 
                             { presets.map((step, i) => (
                                 <option key={`preset-${i}`} value={step.value}>
@@ -52,7 +57,7 @@ const ModularTypeComponent = observer((props) => {
                     </label>
 
                     <NumberInput title='Range'
-                        onChange={(v)=>setConfig('range', v)}
+                        onChange={(v)=>editConfig('range', v)}
                         input={{
                             value: range,
                             style: {width: 40},
@@ -84,13 +89,13 @@ const ModularTypeComponent = observer((props) => {
                 }) }
             </ul>
 
-            <footer>
+            <footer className='c-type-dialog__footer'>
                 <button uxp-variant='secondary' uxp-quiet='true'
-                    onClick={()=>closeDialog()}>Cancel</button>
-                <button type='submit' uxp-variant='cta'>Apply Scale</button>
+                    onClick={closeDialog}>Cancel</button>
+                <button type='submit' uxp-variant='cta'>Apply Step</button>
             </footer>
         </form>
     );
-});
+}));
 
 export default ModularTypeComponent;
