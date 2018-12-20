@@ -1,10 +1,11 @@
 .c-type-dialog {
     width: 620px;
-    margin: 8px 0 20px;
 }
 
 .c-type-dialog__params {
     display: flex;
+    margin: 8px 0 16px;
+
 }
 
 $preview-bg: #EEE;
@@ -45,4 +46,8 @@ $preview-bg: #EEE;
         border-left-color: #2680EB; 
         background: darken($preview-bg, 5);
     }
+}
+
+.c-type-dialog__footer {
+    display: flex;
 }
