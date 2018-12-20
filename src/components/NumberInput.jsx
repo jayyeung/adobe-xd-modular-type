@@ -34,7 +34,10 @@ class NumberInput extends Component {
 
         return (
             <label>
-                <span className={(!valid) && 'color-red'}>{title || ''}</span>
+                <span className={(!valid) ? 'color-red' : ''}>
+                    {title || ''}
+                </span>
+
                 <input type='text' {...input} value={this.val || value}
                     onChange={this._handleChange}/>
             </label>

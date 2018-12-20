@@ -17,8 +17,8 @@ class ModularTypeContainer extends Component {
     };
 
     componentDidMount() { 
-        autorun(this._onDialogActive);
-        autorun(this._propagateTypeStep); 
+        this._onDialogActive();
+        this._propagateTypeStep();
     }
 
     get selectedTextItems() {
@@ -28,14 +28,12 @@ class ModularTypeContainer extends Component {
 
     _selectStep = (step) => { this.currentStep = step; }
 
-    _editConfig = (key) => (val) => { this.props.typeStore.setConfig(key, val); }
-    
-    _propagateTypeStep = () => {
+    _propagateTypeStep = () => autorun(() => {
         const scale = this.currentStep;
         if (!scale) return;
         
         this.selectedTextItems
-            .map(item => {
+            .map((item) => {
                 const { fontSize } = item.styleRanges[0];
                 item.lineSpacing = (scale.fontSize) * (item.lineSpacing / fontSize);
                 item.styleRanges = [{
@@ -43,19 +41,18 @@ class ModularTypeContainer extends Component {
                 }];
             }
         )
-    }
+    })
 
-    _onDialogActive = () => {
+    _onDialogActive = () => autorun(() => {
         // trigger when modal is open
         if (!this.props.dialog.active) return;
 
         // check if current selection is valid
         this.validSelection = (this.selectedTextItems.length > 0);
-    }
+    })
 
     render() {
-        if (!this.validSelection) 
-            return <ErrorDialog />;
+        if (!this.validSelection) return <ErrorDialog />;
 
         return <ModularTypeComponent 
             currentStep={this.currentStep} 

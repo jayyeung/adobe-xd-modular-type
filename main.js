@@ -99,7 +99,7 @@ exports = module.exports = __webpack_require__(/*! ../../node_modules/css-loader
 
 
 // module
-exports.push([module.i, ".u-style-italic {\n  font-style: italic; }\n\n.c-type-dialog {\n  width: 620px; }\n\n.c-type-dialog__params {\n  display: flex; }\n\n.c-type-dialog__preview {\n  background: #EEE;\n  border: 1.5px solid gainsboro;\n  border-left: none;\n  max-height: 320px;\n  overflow-y: scroll; }\n  .c-type-dialog__preview li {\n    padding: 12px 16px;\n    padding-right: 0; }\n    .c-type-dialog__preview li:hover {\n      background: #e1e1e1; }\n\n.c-type-dialog__preview-item {\n  border-left: 4px solid gainsboro; }\n  .c-type-dialog__preview-item:hover {\n    border-left: 4px solid #c5c5c5; }\n  .c-type-dialog__preview-item p {\n    line-height: 0;\n    white-space: nowrap;\n    color: #4B4B4B; }\n  .c-type-dialog__preview-item div {\n    margin: 0.4em 0; }\n  .c-type-dialog__preview-item.base {\n    border-left-color: #6f6f6f;\n    background: #e9e9e9; }\n    .c-type-dialog__preview-item.base::after {\n      content: 'yes'; }\n  .c-type-dialog__preview-item.active {\n    border-left-color: #2680EB;\n    background: #e1e1e1; }\n", ""]);
+exports.push([module.i, ".u-style-italic {\n  font-style: italic; }\n\n.c-type-dialog {\n  width: 620px; }\n\n.c-type-dialog__params {\n  display: flex;\n  margin: 8px 0 16px; }\n\n.c-type-dialog__preview {\n  background: #EEE;\n  border: 1.5px solid gainsboro;\n  border-left: none;\n  max-height: 320px;\n  overflow-y: scroll; }\n  .c-type-dialog__preview li {\n    padding: 12px 16px;\n    padding-right: 0; }\n    .c-type-dialog__preview li:hover {\n      background: #e1e1e1; }\n\n.c-type-dialog__preview-item {\n  border-left: 4px solid gainsboro; }\n  .c-type-dialog__preview-item:hover {\n    border-left: 4px solid #c5c5c5; }\n  .c-type-dialog__preview-item p {\n    line-height: 0;\n    white-space: nowrap;\n    color: #4B4B4B; }\n  .c-type-dialog__preview-item div {\n    margin: 0.4em 0; }\n  .c-type-dialog__preview-item.base {\n    border-left-color: #6f6f6f;\n    background: #e9e9e9; }\n    .c-type-dialog__preview-item.base::after {\n      content: 'yes'; }\n  .c-type-dialog__preview-item.active {\n    border-left-color: #2680EB;\n    background: #e1e1e1; }\n\n.c-type-dialog__footer {\n  display: flex; }\n", ""]);
 
 // exports
 
@@ -26437,74 +26437,275 @@ module.exports = g;
 
 /***/ }),
 
-/***/ "./src/components/NumberInput.jsx":
-/*!****************************************!*\
-  !*** ./src/components/NumberInput.jsx ***!
-  \****************************************/
+/***/ "./node_modules/xd-storage-helper/storage-helper.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/xd-storage-helper/storage-helper.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+ * Copyright (c) 2018. by Pablo Klaschka
+ */
+
+const storage = __webpack_require__(/*! uxp */ "uxp").storage;
+const fs = storage.localFileSystem;
+
+class storageHelper {
+    /**
+     * Creates a data file if none was previously existent.
+     * @return {Promise<storage.File>} The data file
+     * @private
+     */
+    static async init() {
+        let dataFolder = await fs.getDataFolder();
+        try {
+            return await dataFolder.getEntry('storage.json');
+        } catch (e) {
+            const file = await dataFolder.createEntry('storage.json', {type: storage.types.file, overwrite: true});
+            if (file.isFile) {
+                await file.write('{}', {append: false});
+                return file;
+            } else {
+                throw new Error('Storage file storage.json was not a file.');
+            }
+        }
+    }
+
+    /**
+     * Retrieves a value from storage. Saves default value if none is set.
+     * @param {string} key The identifier
+     * @param {*} defaultValue The default value. Gets saved and returned if no value was previously set for the speciefied key.
+     * @return {Promise<*>} The value retrieved from storage. If none is saved, the `defaultValue` is returned.
+     */
+    static async get(key, defaultValue) {
+        const dataFile = await this.init();
+        let object = JSON.parse((await dataFile.read({format: storage.formats.utf8})).toString());
+        if (object[key] === undefined) {
+            await this.set(key, defaultValue);
+            return defaultValue;
+        } else {
+            return object[key];
+        }
+    }
+
+    /**
+     * Saves a certain key-value-pair to the storage.
+     * @param {string} key The identifier
+     * @param {*} value The value that get's saved
+     * @return {Promise<void>}
+     */
+    static async set(key, value) {
+        const dataFile = await this.init();
+        let object = JSON.parse((await dataFile.read({format: storage.formats.utf8})).toString());
+        object[key] = value;
+        return await dataFile.write(JSON.stringify(object), {append: false, format: storage.formats.utf8})
+    }
+
+    /**
+     * Deletes a certain key-value-pair from the storage
+     * @param {string} key The key of the deleted pair
+     * @return {Promise<void>}
+     */
+    static async delete(key) {
+        return await this.set(key, undefined);
+    }
+
+    /**
+     * Resets (i.e. purges) all stored settings.
+     * @returns {Promise<void>}
+     */
+    static async reset() {
+        const dataFile = await this.init();
+        return await dataFile.write('{}', {append: false, format: storage.formats.utf8})
+
+    }
+}
+
+module.exports = storageHelper;
+
+
+/***/ }),
+
+/***/ "./src/assets/presets.js":
+/*!*******************************!*\
+  !*** ./src/assets/presets.js ***!
+  \*******************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-
-
-let NumberInput = class NumberInput extends react__WEBPACK_IMPORTED_MODULE_0__["Component"] {
-    constructor(props) {
-        super(props);
-
-        this._handleChange = e => {
-            const value = e.target.value;
-            this.setState({ value });
-
-            // Temporary way to validate values :P
-            // until Adobe XD implements proper number inputs
-            if (this._validate(value)) return this.props.input.onValidChange(value);
-        };
-
-        this.state = { value: '' };
-    }
-
-    componentDidMount() {
-        const initValue = this.props.input.value || '';
-        this.setState({ value: initValue });
-    }
-
-    _validate(value) {
-        return (/^(?:[1-9]\d*|0)?(?:\.\d+)?$/g.test(value)
-        );
-    }
-
-    render() {
-        const { value } = this.state;
-        const { title, input } = this.props;
-
-        return react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(
-            'label',
-            null,
-            react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(
-                'span',
-                null,
-                title || ''
-            ),
-            react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement('input', _extends({ type: 'text' }, input, { value: value,
-                onChange: this._handleChange }))
-        );
-    }
-};
-
-
-/* harmony default export */ __webpack_exports__["default"] = (NumberInput);
+// Predefined Scales
+/* harmony default export */ __webpack_exports__["default"] = ([{ label: "Minor Second", value: 1.067 }, { label: "Major Second", value: 1.125 }, { label: "Minor Third", value: 1.2 }, { label: "Major Third", value: 1.25 }, { label: "perfect Fourth", value: 1.333 }, { label: "Aug. Fourth", value: 1.414 }, { label: "Perfect Fifth", value: 1.5 }, { label: "Minor Sixth", value: 1.6 }, { label: "Golden Section", value: 1.618 }, { label: "Major Sixth", value: 1.667 }, { label: "Minor Seventh", value: 1.778 }, { label: "Major Seventh", value: 1.875 }, { label: "Octave", value: 2 }]);
 
 /***/ }),
 
-/***/ "./src/components/TypeDialog.jsx":
-/*!***************************************!*\
-  !*** ./src/components/TypeDialog.jsx ***!
-  \***************************************/
+/***/ "./src/components/ModularType/ModularTypeComponent.jsx":
+/*!*************************************************************!*\
+  !*** ./src/components/ModularType/ModularTypeComponent.jsx ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var mobx_react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mobx-react */ "./node_modules/mobx-react/index.module.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _NumberInput_jsx__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../NumberInput.jsx */ "./src/components/NumberInput.jsx");
+/* harmony import */ var _assets_presets__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../assets/presets */ "./src/assets/presets.js");
+
+
+
+
+
+
+const ModularTypeComponent = Object(mobx_react__WEBPACK_IMPORTED_MODULE_0__["inject"])('dialog', 'typeStore')(Object(mobx_react__WEBPACK_IMPORTED_MODULE_0__["observer"])(props => {
+    const { currentStep, selectStep, inpRef } = props;
+
+    const { acceptDialog, closeDialog } = props.dialog;
+    const { typeConfig, editConfig, modularScale } = props.typeStore;
+    const { ratio, range, baseSize } = typeConfig;
+
+    return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+        'form',
+        { className: 'c-type-dialog', onSubmit: acceptDialog },
+        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+            'h1',
+            null,
+            'Modulize Type'
+        ),
+        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+            'p',
+            null,
+            'Automatically scale your selected text layers based on a chosen font size/step.'
+        ),
+        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement('hr', null),
+        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+            'fieldset',
+            { className: 'c-type-dialog__params' },
+            react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                'div',
+                { className: 'row' },
+                react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_2__["default"], { title: 'Font Size (px)',
+                    onChange: v => editConfig('baseSize', v),
+                    input: {
+                        autoFocus: true,
+                        value: baseSize,
+                        style: { width: 72 },
+                        placeholder: 'Eg. 16'
+                    }
+                })
+            ),
+            react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                'div',
+                { className: 'row' },
+                react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_2__["default"], { title: 'Scale Ratio',
+                    ref: inpRef.ratio,
+                    onChange: v => {
+                        editConfig('ratio', v);inpRef.ratioDD.current.selectedIndex = 0;
+                    },
+                    input: {
+                        value: ratio,
+                        placeholder: 'Eg. 1.618'
+                    }
+                }),
+                react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                    'label',
+                    { style: { marginRight: 20 } },
+                    react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement('span', null),
+                    react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                        'select',
+                        { 'uxp-quiet': 'true',
+                            ref: inpRef.ratioDD,
+                            onChange: e => {
+                                inpRef.ratio.current.setValue(e.target.value);editConfig('ratio', e.target.value);
+                            } },
+                        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                            'option',
+                            { value: ratio },
+                            'Custom Ratio'
+                        ),
+                        _assets_presets__WEBPACK_IMPORTED_MODULE_3__["default"].map((step, i) => react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                            'option',
+                            { key: `preset-${i}`, value: step.value },
+                            `${step.label} – ${step.value}`
+                        ))
+                    )
+                ),
+                react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_2__["default"], { title: 'Range',
+                    onChange: v => editConfig('range', v),
+                    input: {
+                        value: range,
+                        style: { width: 40 },
+                        placeholder: 'Eg. 4'
+                    }
+                })
+            )
+        ),
+        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+            'ul',
+            { className: 'c-type-dialog__preview' },
+            modularScale.map(step_i => {
+                const { step, fontSize, fontSizeEm } = step_i;
+                const isBase = step === 0 ? 'base' : '';
+                const isActive = currentStep && currentStep.step === step ? 'active' : '';
+                const pStyles = { fontSize };
+
+                return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                    'li',
+                    { className: `c-type-dialog__preview-item ${isBase} ${isActive}`,
+                        onClick: () => selectStep(step_i),
+                        key: `step-${step}` },
+                    react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                        'p',
+                        { style: pStyles },
+                        'The quick brown fox jumps over the lazy dog'
+                    ),
+                    react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                        'div',
+                        { className: 'row', style: { opacity: 0.7, marginLeft: 12 } },
+                        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                            'span',
+                            null,
+                            `${isBase ? 'Base' : `Step ${step}`} –`
+                        ),
+                        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                            'span',
+                            null,
+                            ` ${parseFloat(fontSize.toFixed(3))}px / ${parseFloat(fontSizeEm.toFixed(3))}em`
+                        )
+                    )
+                );
+            })
+        ),
+        react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+            'footer',
+            { className: 'c-type-dialog__footer' },
+            react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                'button',
+                { 'uxp-variant': 'secondary', 'uxp-quiet': 'true',
+                    onClick: closeDialog },
+                'Cancel'
+            ),
+            react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                'button',
+                { type: 'submit', 'uxp-variant': 'cta' },
+                'Apply Step'
+            )
+        )
+    );
+}));
+
+/* harmony default export */ __webpack_exports__["default"] = (ModularTypeComponent);
+
+/***/ }),
+
+/***/ "./src/components/ModularType/ModularTypeContainer.jsx":
+/*!*************************************************************!*\
+  !*** ./src/components/ModularType/ModularTypeContainer.jsx ***!
+  \*************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -26516,8 +26717,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var scenegraph__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! scenegraph */ "scenegraph");
 /* harmony import */ var scenegraph__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(scenegraph__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var _NumberInput_jsx__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./NumberInput.jsx */ "./src/components/NumberInput.jsx");
-var _dec, _class, _desc, _value, _class2, _descriptor;
+/* harmony import */ var _ModularTypeComponent_jsx__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ModularTypeComponent.jsx */ "./src/components/ModularType/ModularTypeComponent.jsx");
+var _dec, _class, _desc, _value, _class2, _descriptor, _descriptor2;
 
 function _initDefineProp(target, property, descriptor, context) {
     if (!descriptor) return;
@@ -26569,200 +26770,295 @@ function _initializerWarningHelper(descriptor, context) {
 
 
 
-let TypeDialog = (_dec = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["inject"])('typeStore'), _dec(_class = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_class = (_class2 = class TypeDialog extends react__WEBPACK_IMPORTED_MODULE_2__["Component"] {
+let ModularTypeContainer = (_dec = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["inject"])('dialog', 'typeStore'), _dec(_class = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["observer"])(_class = (_class2 = class ModularTypeContainer extends react__WEBPACK_IMPORTED_MODULE_2__["Component"] {
     constructor(...args) {
         var _temp;
 
-        return _temp = super(...args), _initDefineProp(this, 'selectedStep', _descriptor, this), _temp;
+        return _temp = super(...args), _initDefineProp(this, 'currentStep', _descriptor, this), _initDefineProp(this, 'validSelection', _descriptor2, this), this.inputRef = {
+            ratio: Object(react__WEBPACK_IMPORTED_MODULE_2__["createRef"])(),
+            ratioDD: Object(react__WEBPACK_IMPORTED_MODULE_2__["createRef"])()
+        }, this._selectStep = step => {
+            this.currentStep = step;
+        }, this._propagateTypeStep = () => Object(mobx__WEBPACK_IMPORTED_MODULE_0__["autorun"])(() => {
+            const scale = this.currentStep;
+            if (!scale) return;
+
+            this.selectedTextItems.map(item => {
+                const { fontSize } = item.styleRanges[0];
+                item.lineSpacing = scale.fontSize * (item.lineSpacing / fontSize);
+                item.styleRanges = [{
+                    fontSize: scale.fontSize
+                }];
+            });
+        }), this._onDialogActive = () => Object(mobx__WEBPACK_IMPORTED_MODULE_0__["autorun"])(() => {
+            // trigger when modal is open
+            if (!this.props.dialog.active) return;
+
+            // check if current selection is valid
+            this.validSelection = this.selectedTextItems.length > 0;
+        }), _temp;
     }
 
     componentDidMount() {
+        this._onDialogActive();
         this._propagateTypeStep();
     }
 
-    _propagateTypeStep() {
-        const { selection } = this.props;
-
-        Object(mobx__WEBPACK_IMPORTED_MODULE_0__["autorun"])(() => {
-            if (!this.selectedStep) return;
-
-            selection.items.filter(item => {
-                return item instanceof scenegraph__WEBPACK_IMPORTED_MODULE_3__["Text"];
-            }).map(item => {
-                const { fontSize } = item.styleRanges[0];
-                item.lineSpacing = this.selectedStep.fontSize * (item.lineSpacing / fontSize);
-                item.styleRanges = [{
-                    fontSize: this.selectedStep.fontSize
-                }];
-            });
-        });
-    }
-
-    _selectStep(step) {
-        this.selectedStep = step;
-    }
-    acceptDialog() {
-        return this.closeDialog('USER_ACCEPT');
-    }
-    closeDialog(reason) {
-        return this.props.dialog.close(reason || 'USER_CANCEL');
+    get selectedTextItems() {
+        const selection = this.props.dialog.selection.items;
+        return selection.filter(item => item instanceof scenegraph__WEBPACK_IMPORTED_MODULE_3__["Text"]);
     }
 
     render() {
-        const { typeConfig, setConfig, modularScale } = this.props.typeStore;
-        const { ratio, range, baseSize } = typeConfig;
+        if (!this.validSelection) return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(ErrorDialog, null);
 
-        return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-            'form',
-            { className: 'c-type-dialog', onSubmit: () => this.acceptDialog() },
-            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                'h1',
-                null,
-                'Modulize Type'
-            ),
-            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                'p',
-                null,
-                'Automatically scale your selected text layers based on a chosen font size/step.'
-            ),
-            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement('hr', null),
-            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                'fieldset',
-                { className: 'c-type-dialog__params', style: { margin: '8px 0 20px' } },
-                react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                    'div',
-                    { className: 'row' },
-                    react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_4__["default"], { title: 'Font Size (px)', input: {
-                            autoFocus: true,
-                            value: baseSize,
-                            onValidChange: setConfig('baseSize'),
-                            placeholder: 'Eg. 16'
-                        } })
-                ),
-                react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                    'div',
-                    { className: 'row' },
-                    react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_4__["default"], { title: 'Scale Ratio', input: {
-                            value: ratio,
-                            onValidChange: setConfig('ratio'),
-                            placeholder: 'Eg. 1.618'
-                        } }),
-                    react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                        'label',
-                        { style: { marginRight: 28 } },
-                        react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement('span', null),
-                        react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                            'select',
-                            { 'uxp-quiet': 'true', onChange: e => setConfig('ratio')(e.target.value || ratio) },
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'option',
-                                { disabled: true },
-                                'Custom Ratio'
-                            ),
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'option',
-                                { value: '1.125' },
-                                'Major Second \u2013 8:9'
-                            ),
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'option',
-                                { value: '1.2' },
-                                'Minor Third \u2013 5:6'
-                            ),
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'option',
-                                { value: '1.25' },
-                                'Major Third \u2013 4:5'
-                            ),
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'option',
-                                { value: '1.333' },
-                                'Fourth \u2013 3:4'
-                            ),
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'option',
-                                { value: '1.414' },
-                                'Augmented Fourth \u2013 1:\u221A4'
-                            ),
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'option',
-                                { value: '1.5' },
-                                'Fifth \u2013 2:3'
-                            ),
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'option',
-                                { value: '1.667' },
-                                'Minor Sixth \u2013 5:8'
-                            )
-                        )
-                    ),
-                    react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_NumberInput_jsx__WEBPACK_IMPORTED_MODULE_4__["default"], { title: 'Range', input: {
-                            value: range,
-                            onValidChange: setConfig('range'),
-                            style: { width: 40 },
-                            placeholder: 'Eg. 4'
-                        } })
-                )
-            ),
-            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                'ul',
-                { className: 'c-type-dialog__preview' },
-                modularScale.map(step_i => {
-                    const { step, fontSize, fontSizeEm } = step_i;
-                    const isBase = step === 0 ? 'base' : '';
-                    const isActive = this.selectedStep && this.selectedStep.step === step ? 'active' : '';
-                    return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                        'li',
-                        { className: `c-type-dialog__preview-item ${isBase} ${isActive}`,
-                            onClick: () => this._selectStep(step_i), key: `step-${step}` },
-                        react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                            'p',
-                            { style: { fontSize: fontSize } },
-                            'The quick brown fox jumps over the lazy dog'
-                        ),
-                        react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                            'div',
-                            { className: 'row', style: { opacity: 0.7, marginLeft: 12 } },
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'span',
-                                null,
-                                `${isBase ? 'Base' : `Step ${step}`} –`
-                            ),
-                            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                                'span',
-                                null,
-                                ` ${fontSize.toFixed(3)}px / ${fontSizeEm.toFixed(3)}em`
-                            )
-                        )
-                    );
-                })
-            ),
-            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                'footer',
-                null,
-                react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                    'button',
-                    { 'uxp-variant': 'secondary', 'uxp-quiet': 'true',
-                        onClick: () => this.closeDialog() },
-                    'Cancel'
-                ),
-                react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
-                    'button',
-                    { type: 'submit', 'uxp-variant': 'cta' },
-                    'Apply Scale'
-                )
-            )
-        );
+        return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(_ModularTypeComponent_jsx__WEBPACK_IMPORTED_MODULE_4__["default"], {
+            currentStep: this.currentStep,
+            selectStep: this._selectStep,
+            inpRef: this.inputRef
+        });
     }
-}, (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'selectedStep', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
+}, (_descriptor = _applyDecoratedDescriptor(_class2.prototype, 'currentStep', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
     enumerable: true,
     initializer: function () {
         return null;
     }
+}), _descriptor2 = _applyDecoratedDescriptor(_class2.prototype, 'validSelection', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
+    enumerable: true,
+    initializer: function () {
+        return false;
+    }
 })), _class2)) || _class) || _class);
 
 
-/* harmony default export */ __webpack_exports__["default"] = (TypeDialog);
+const ErrorDialog = props => {
+    return react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
+        'form',
+        { style: { width: 300 } },
+        react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
+            'h1',
+            null,
+            'Modular Type \u2014 Selection error'
+        ),
+        react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement('hr', null),
+        react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
+            'p',
+            null,
+            'Please select at least one text element directly.'
+        ),
+        react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
+            'footer',
+            null,
+            react__WEBPACK_IMPORTED_MODULE_2___default.a.createElement(
+                'button',
+                { type: 'submit', 'uxp-variant': 'cta' },
+                'Close'
+            )
+        )
+    );
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (ModularTypeContainer);
+
+/***/ }),
+
+/***/ "./src/components/ModularType/index.js":
+/*!*********************************************!*\
+  !*** ./src/components/ModularType/index.js ***!
+  \*********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ModularTypeContainer_jsx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ModularTypeContainer.jsx */ "./src/components/ModularType/ModularTypeContainer.jsx");
+
+/* harmony default export */ __webpack_exports__["default"] = (_ModularTypeContainer_jsx__WEBPACK_IMPORTED_MODULE_0__["default"]);
+
+/***/ }),
+
+/***/ "./src/components/NumberInput.jsx":
+/*!****************************************!*\
+  !*** ./src/components/NumberInput.jsx ***!
+  \****************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mobx */ "./node_modules/mobx/lib/mobx.module.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+
+
+
+let NumberInput = class NumberInput extends react__WEBPACK_IMPORTED_MODULE_1__["Component"] {
+    constructor(props) {
+        super(props);
+
+        this.isNumber = value => /^(?:[1-9]\d*|0)?(?:\.\d+)?$/g.test(value);
+
+        this.setValue = value => {
+            this.setState({ value });
+        };
+
+        this._handleChange = e => {
+            const value = e.target.value;
+            this.setValue(value);
+
+            // Temporary way to validate values :P
+            // until Adobe XD implements proper number inputs
+            const isNumber = this.isNumber(value);
+            this.setState({ valid: isNumber });
+            if (isNumber) return this.props.onChange(value);
+        };
+
+        this.state = { value: '', valid: true };
+    }
+
+    componentDidMount() {
+        // set initial value of input
+        const initValue = this.props.input.value || '';
+        this.setValue(initValue);
+    }
+
+    render() {
+        const { valid, value } = this.state;
+        const { title, input } = this.props;
+
+        return react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+            'label',
+            null,
+            react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement(
+                'span',
+                { className: !valid ? 'color-red' : '' },
+                title || ''
+            ),
+            react__WEBPACK_IMPORTED_MODULE_1___default.a.createElement('input', _extends({ type: 'text' }, input, { value: this.val || value,
+                onChange: this._handleChange }))
+        );
+    }
+};
+
+
+/* harmony default export */ __webpack_exports__["default"] = (NumberInput);
+
+/***/ }),
+
+/***/ "./src/dialog.js":
+/*!***********************!*\
+  !*** ./src/dialog.js ***!
+  \***********************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mobx */ "./node_modules/mobx/lib/mobx.module.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
+/* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_2__);
+var _desc, _value, _class, _descriptor, _descriptor2;
+
+function _initDefineProp(target, property, descriptor, context) {
+    if (!descriptor) return;
+    Object.defineProperty(target, property, {
+        enumerable: descriptor.enumerable,
+        configurable: descriptor.configurable,
+        writable: descriptor.writable,
+        value: descriptor.initializer ? descriptor.initializer.call(context) : void 0
+    });
+}
+
+function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
+    var desc = {};
+    Object['ke' + 'ys'](descriptor).forEach(function (key) {
+        desc[key] = descriptor[key];
+    });
+    desc.enumerable = !!desc.enumerable;
+    desc.configurable = !!desc.configurable;
+
+    if ('value' in desc || desc.initializer) {
+        desc.writable = true;
+    }
+
+    desc = decorators.slice().reverse().reduce(function (desc, decorator) {
+        return decorator(target, property, desc) || desc;
+    }, desc);
+
+    if (context && desc.initializer !== void 0) {
+        desc.value = desc.initializer ? desc.initializer.call(context) : void 0;
+        desc.initializer = undefined;
+    }
+
+    if (desc.initializer === void 0) {
+        Object['define' + 'Property'](target, property, desc);
+        desc = null;
+    }
+
+    return desc;
+}
+
+function _initializerWarningHelper(descriptor, context) {
+    throw new Error('Decorating class property failed. Please ensure that transform-class-properties is enabled.');
+}
+
+
+
+
+
+let Dialog = (_class = class Dialog {
+    constructor() {
+        _initDefineProp(this, 'active', _descriptor, this);
+
+        this.target = null;
+
+        this.createDialog = component => {
+            if (this.target == null) {
+                this.target = document.createElement('dialog');
+                react_dom__WEBPACK_IMPORTED_MODULE_2___default.a.render(component, this.target);
+            }
+            return this.target;
+        };
+
+        _initDefineProp(this, '_setActive', _descriptor2, this);
+
+        this.closeDialog = () => {
+            this.target.close('USER_CLOSE');
+        };
+
+        this.acceptDialog = () => {
+            this.target.close('USER_ACCEPT');
+        };
+    }
+
+    async getDialog() {
+        this._setActive(true);
+        const res = await document.body.appendChild(this.target).showModal();
+        this._setActive(false);
+        return res;
+    }
+
+}, (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'active', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
+    enumerable: true,
+    initializer: function () {
+        return false;
+    }
+}), _descriptor2 = _applyDecoratedDescriptor(_class.prototype, '_setActive', [mobx__WEBPACK_IMPORTED_MODULE_0__["action"]], {
+    enumerable: true,
+    initializer: function () {
+        return active => {
+            this.active = active;
+        };
+    }
+})), _class);
+
+
+const dialog = new Dialog();
+/* harmony default export */ __webpack_exports__["default"] = (dialog);
 
 /***/ }),
 
@@ -26774,34 +27070,26 @@ let TypeDialog = (_dec = Object(mobx_react__WEBPACK_IMPORTED_MODULE_1__["inject"
 /***/ (function(module, exports, __webpack_require__) {
 
 const reactShim = __webpack_require__(/*! ./react-shim */ "./src/react-shim.js");
-const { Provider } = __webpack_require__(/*! mobx-react */ "./node_modules/mobx-react/index.module.js");
 const React = __webpack_require__(/*! react */ "./node_modules/react/index.js");
-const ReactDOM = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
+const { Provider } = __webpack_require__(/*! mobx-react */ "./node_modules/mobx-react/index.module.js");
 
 const styles = __webpack_require__(/*! ./styles/main.scss */ "./src/styles/main.scss");
 const stores = __webpack_require__(/*! ./stores/store */ "./src/stores/store.js").default;
-const TypeDialog = __webpack_require__(/*! ./components/TypeDialog.jsx */ "./src/components/TypeDialog.jsx").default;
+const dialog = __webpack_require__(/*! ./dialog */ "./src/dialog.js").default;
+const ModularType = __webpack_require__(/*! ./components/ModularType */ "./src/components/ModularType/index.js").default;
 
-let dialog;
-function getDialog(selection) {
-    if (dialog == null) {
-        dialog = document.createElement('dialog');
-        ReactDOM.render(React.createElement(
-            Provider,
-            stores,
-            React.createElement(TypeDialog, {
-                selection: selection,
-                dialog: dialog })
-        ), dialog);
-    }
-    return dialog;
-}
+dialog.createDialog(React.createElement(
+    Provider,
+    { dialog: dialog, typeStore: stores.typeStore },
+    React.createElement(ModularType, null)
+));
 
 module.exports.commands = {
     menuCommand: async function (selection) {
-        const res = await document.body.appendChild(getDialog(selection)).showModal();
+        dialog.selection = selection;
+        const res = await dialog.getDialog();
         switch (res) {
-            case 'reasonCanceled':case 'USER_CANCEL':
+            case 'reasonCanceled':case 'USER_CLOSE':
                 throw new Error('Rejected: User canceled dialog');
         }
     }
@@ -26854,7 +27142,9 @@ if (window.HTMLIFrameElement == null) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mobx__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mobx */ "./node_modules/mobx/lib/mobx.module.js");
-var _dec, _desc, _value, _class, _descriptor;
+/* harmony import */ var xd_storage_helper__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! xd-storage-helper */ "./node_modules/xd-storage-helper/storage-helper.js");
+/* harmony import */ var xd_storage_helper__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(xd_storage_helper__WEBPACK_IMPORTED_MODULE_1__);
+var _desc, _value, _class, _descriptor, _descriptor2, _descriptor3;
 
 function _initDefineProp(target, property, descriptor, context) {
     if (!descriptor) return;
@@ -26901,17 +27191,28 @@ function _initializerWarningHelper(descriptor, context) {
 
 
 
-let TypeStore = (_dec = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, (_class = class TypeStore {
-    constructor() {
-        _initDefineProp(this, 'typeConfig', _descriptor, this);
 
-        this.setConfig = key => value => this.setConfigKey(key, value);
+let TypeStore = (_class = class TypeStore {
+    constructor() {
+        _initDefineProp(this, 'loading', _descriptor, this);
+
+        _initDefineProp(this, 'typeConfig', _descriptor2, this);
+
+        _initDefineProp(this, 'editConfig', _descriptor3, this);
+    }
+
+    async fetchSavedConfigs() {
+        return await xd_storage_helper__WEBPACK_IMPORTED_MODULE_1___default.a.get('typeConfigs', []);
+    }
+
+    async saveCurrentConfigs() {
+        return xd_storage_helper__WEBPACK_IMPORTED_MODULE_1___default.a.set('typeConfigs', [...(await this.fetchSavedConfigs()), this.typeConfig]);
     }
 
     get modularScale() {
         const { range, ratio, baseSize } = this.typeConfig;
-        let step;let steps = [];
-        for (let i = range; i >= -4; i--) {
+        let step, i;let steps = [];
+        for (i = range; i >= -4; i--) {
             step = { step: i, fontSize: baseSize * ratio ** i };
             step.fontSizeEm = step.fontSize / baseSize;
             steps.push(step);
@@ -26919,33 +27220,12 @@ let TypeStore = (_dec = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, (_cla
         return steps;
     }
 
-    // constructor() { this._fetchUserPref(); }
-
-    /* async _fetchUserPref() {
-        // TODO: add saving preferences
-        // when needed in the future
-    }*/
-    setConfigKey(key, value) {
-        if (!(key in this.typeConfig)) return console.log('no');
-
-        // TODO: implement better bounds checking
-        let min = 1,
-            max = value;
-        switch (key) {
-            case 'ratio':
-                max = 3;break;
-            case 'range':
-                max = 15;break;
-            case 'baseSize':
-                max = 100;break;
-        }
-
-        this.typeConfig[key] = Math.max(Math.min(value, max), min);
+}, (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'loading', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
+    enumerable: true,
+    initializer: function () {
+        return false;
     }
-
-    // Temporary curry function used
-    // for <NumberInput />'s 'onValidChange' function
-}, (_descriptor = _applyDecoratedDescriptor(_class.prototype, 'typeConfig', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
+}), _descriptor2 = _applyDecoratedDescriptor(_class.prototype, 'typeConfig', [mobx__WEBPACK_IMPORTED_MODULE_0__["observable"]], {
     enumerable: true,
     initializer: function () {
         return {
@@ -26954,7 +27234,28 @@ let TypeStore = (_dec = mobx__WEBPACK_IMPORTED_MODULE_0__["action"].bound, (_cla
             baseSize: 16
         };
     }
-}), _applyDecoratedDescriptor(_class.prototype, 'modularScale', [mobx__WEBPACK_IMPORTED_MODULE_0__["computed"]], Object.getOwnPropertyDescriptor(_class.prototype, 'modularScale'), _class.prototype), _applyDecoratedDescriptor(_class.prototype, 'setConfigKey', [_dec], Object.getOwnPropertyDescriptor(_class.prototype, 'setConfigKey'), _class.prototype)), _class));
+}), _applyDecoratedDescriptor(_class.prototype, 'modularScale', [mobx__WEBPACK_IMPORTED_MODULE_0__["computed"]], Object.getOwnPropertyDescriptor(_class.prototype, 'modularScale'), _class.prototype), _descriptor3 = _applyDecoratedDescriptor(_class.prototype, 'editConfig', [mobx__WEBPACK_IMPORTED_MODULE_0__["action"]], {
+    enumerable: true,
+    initializer: function () {
+        return (key, value) => {
+            if (!(key in this.typeConfig)) return;
+
+            // TODO: implement better bounds checking
+            let min = 1,
+                max = value;
+            switch (key) {
+                case 'ratio':
+                    max = 3;break;
+                case 'range':
+                    max = 15;break;
+                case 'baseSize':
+                    max = 100;break;
+            }
+
+            this.typeConfig[key] = Math.max(Math.min(value, max), min);
+        };
+    }
+})), _class);
 
 
 const typeStore = new TypeStore();
@@ -27015,6 +27316,17 @@ if(false) {}
 /***/ (function(module, exports) {
 
 module.exports = require("scenegraph");
+
+/***/ }),
+
+/***/ "uxp":
+/*!**********************!*\
+  !*** external "uxp" ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("uxp");
 
 /***/ })
 

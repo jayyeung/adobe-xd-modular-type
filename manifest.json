@@ -5,8 +5,8 @@
     "minVersion" : "13.0.0"
   },
 
-  "description" : "Sample plugin for Adobe XD, providing starter project scaffolding.",
-  "id" : "73b28623",
+  "description" : "Modular Type helps you create a modular scale and pick type sizes from it easily and effortlessly.",
+  "id" : "01253ce6",
   "version" : "0.9.0",
 
   "icons" : [ {
